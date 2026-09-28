@@ -1,0 +1,17 @@
+# Project Risk Register
+
+This document identifies technical, methodological, and operational risks associated with new-product cold-start forecasting and analogue selection, evaluated for likelihood, severity, and mitigation strategy.
+
+---
+
+## Risk Assessment Matrix
+
+| ID | Risk Description | Category | Likelihood | Impact | Severity Score (L x I) | Mitigation Strategy |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **R-01** | **Cold-Start of Cold-Start (Zero Category Match)**: Commercial team introduces a product in an entirely novel or unprecedented category with zero historical products in catalog. | Data / ML | Medium | High | **HIGH** | **Phase 1 Implementation**: System detects zero category matches, logs an explicit fallback notification, degrades to the cross-catalog grand average baseline, and sharply drops the confidence score ($C \le 0.30$) to signal low certainty to planners. |
+| **R-02** | **Promotion Confounding**: Historical analogue launch curves were heavily subsidized by introductory price cuts (e.g., 25% off) while the new SKU will launch at full price. | ML / Evaluation | High | High | **CRITICAL** | **Phase 2 Implementation**: Promotional de-biasing algorithm ($Y_{\text{debias}} = Y_{\text{raw}} / (1 + \text{PromoLift})$) strips circular flyer discount lifts to isolate organic launch baselines, verifiable via toggle in the interactive UI and CLI. |
+| **R-03** | **Festival Date Drift**: Cultural festival dates (e.g., Diwali, Lunar New Year) shift across calendar weeks from year to year, causing calendar misalignment in raw historical data. | Domain / Data | High | Medium | **HIGH** | Normalize launch curves by **relative event week** ($T_{\text{festival}} - \Delta t$) rather than Gregorian calendar week. In Phase 1, synthetic curves are indexed by relative `week_post_launch` and festival linkage tags. |
+| **R-04** | **Sparse / Low-Volume Subcategories**: Subcategories with only 1-2 historical products provide insufficient analogue diversity, causing high forecast variance. | Data / ML | Medium | Medium | **MEDIUM** | The confidence score formulation explicitly penalizes low analogue depth ($N_{\text{valid}} / k$) and high curve coefficient of variation ($\text{CV}$). The system falls back on category-level weighting. |
+| **R-05** | **Planner Mistrust of Black-Box Recommendations**: Demand planners reject system-suggested allocations if they cannot understand why specific analogues were selected. | Operational / Adoption | High | High | **CRITICAL** | **Phase 1 Core Architecture**: The weighted Gower similarity metric provides full transparency: every candidate analogue includes a percentage breakdown of contributing attributes and a natural-language rationale string. |
+| **R-06** | **Audit Trail Tampering or Non-Compliance**: Planners retroactively altering past forecasts to hide ordering mistakes or mask inaccurate projections. | Governance / Security | Low | High | **HIGH** | **Phase 1 Implementation**: SQLite database triggers (`BEFORE UPDATE` and `BEFORE DELETE` aborting transactions) enforce strict append-only immutability on `plan_changes`. |
+| **R-07** | **Supply Chain Bottlenecks & Disruptions**: Upstream vendor delays or distribution warehouse capacity constraints invalidate launch plans. | Operational | High | Medium | **HIGH** | **Phase 2 Implementation**: Disruption simulation module (`src/disruption_scenarios.py`) allows stress-testing under supplier delays, cold-chain capacity caps, and viral spikes. |

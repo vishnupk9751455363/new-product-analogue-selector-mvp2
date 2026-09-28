@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DemandLens — Autonomous Analogue Selector & Cold-Start Decision Intelligence</title>
+  <meta name="description" content="Explainable Decision-Support System for Grocery Distributor Cold-Start Product Demand Forecasting">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Relative path for local file viewing + server fallback -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Ambient floating glow orbs -->
+  <div class="glow-orb glow-top-left"></div>
+  <div class="glow-orb glow-bottom-right"></div>
+  <div class="glow-accent-mid"></div>
+
+  <!-- Header & Navigation -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <div class="brand-logo-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5" stroke="url(#prismGrad)" stroke-width="2" fill="rgba(99, 102, 241, 0.25)"/>
+          <circle cx="12" cy="12" r="3.5" fill="#38BDF8"/>
+          <defs>
+            <linearGradient id="prismGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#38BDF8"/>
+              <stop offset="0.5" stop-color="#818CF8"/>
+              <stop offset="1" stop-color="#C084FC"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="brand-container">
+        <div class="brand-badge-row">
+          <span class="brand-badge">DECISION INTELLIGENCE</span>
+          <span class="brand-ver-pill">v2.4 Enterprise</span>
+        </div>
+        <h1 class="brand-title">Demand<span class="gradient-text">Lens</span></h1>
+        <span class="brand-subtitle">Autonomous Cold-Start Analogue Selector & Audit Platform</span>
+      </div>
+    </div>
+
+    <!-- Segmented Navigation Controller -->
+    <nav class="app-nav">
+      <button class="nav-btn active" data-tab="tab-forecaster" id="nav-btn-forecaster">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        Analogue Forecaster
+      </button>
+      <button class="nav-btn" data-tab="tab-benchmark" id="nav-btn-benchmark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+        Evaluation Benchmark
+      </button>
+      <button class="nav-btn" data-tab="tab-audit" id="nav-btn-audit">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Immutable Audit Ledger
+      </button>
+      <button class="nav-btn" data-tab="tab-disruption" id="nav-btn-disruption">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Disruption Simulator
+      </button>
+      <button class="nav-btn" data-tab="tab-edge" id="nav-btn-edge">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Edge Case Sandbox
+      </button>
+    </nav>
+
+    <!-- Header Telemetry & Live Clock -->
+    <div class="header-telemetry-cluster">
+      <div class="system-status-indicator">
+        <div class="status-beacon-container">
+          <span class="status-dot"></span>
+          <span class="status-radar-ring"></span>
+        </div>
+        <span class="status-label" id="system-status-text">Engine Online (Port 8000)</span>
+      </div>
+      <div class="header-clock-ticker" id="header-clock-ticker">
+        UTC --:--:--
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Container -->
+  <main class="app-main">
+    
+    <!-- TAB 1: FORECASTER & ANALOGUE SELECTOR -->
+    <section class="tab-pane active" id="tab-forecaster">
+      <div class="layout-grid">
+        
+        <!-- Left Column: Controls & Product Selection -->
+        <aside class="sidebar-panel">
+          
+          <!-- SKU Selector Card -->
+          <div class="glass-card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+                  Cold-Start SKU Selector
+                </h2>
+                <span class="card-desc" style="margin-bottom: 0;">Select a zero-sales candidate product to generate analogue matches</span>
+              </div>
+              <span class="badge badge-accent" id="sku-type-badge">Zero Sales</span>
+            </div>
+            
+            <!-- Category Quick Filter Chips -->
+            <div class="quick-filter-bar" id="category-filter-bar">
+              <button class="filter-chip active" data-cat="all">All (12)</button>
+              <button class="filter-chip" data-cat="Bakery">Bakery</button>
+              <button class="filter-chip" data-cat="Confectionery">Confectionery</button>
+              <button class="filter-chip" data-cat="Dairy & Refrigerated">Dairy</button>
+              <button class="filter-chip" data-cat="Beverages">Beverages</button>
+            </div>
+
+            <div class="form-group">
+              <label for="product-select">
+                <span>Target Product Catalog</span>
+                <small style="color: var(--cyan-400); font-family: var(--font-mono);">12 Test SKUs</small>
+              </label>
+              <div class="custom-select-wrapper">
+                <select id="product-select" class="custom-select">
+                  <option value="" disabled selected>Loading cold-start SKUs...</option>
+                </select>
+                <div class="custom-select-arrow">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Target Product Spec Hologram Box -->
+            <div class="product-spec-box" id="product-spec-box">
+              <div class="spec-header">
+                <div class="spec-sku-wrapper">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--cyan-400);"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                  <span class="spec-sku" id="spec-sku">PRD_NEW_083</span>
+                </div>
+                <span class="spec-tier premium" id="spec-tier">BUDGET</span>
+              </div>
+              <div class="spec-name" id="spec-name">Gourmet Candies (Budget 4pk)</div>
+              
+              <div class="spec-tags-grid">
+                <div class="spec-tag">
+                  <span class="tag-lbl">Category</span>
+                  <span class="tag-val" id="spec-cat">Confectionery</span>
+                </div>
+                <div class="spec-tag">
+                  <span class="tag-lbl">Subcategory</span>
+                  <span class="tag-val" id="spec-subcat">Gourmet Candies</span>
+                </div>
+                <div class="spec-tag">
+                  <span class="tag-lbl">Pack Size</span>
+                  <span class="tag-val" id="spec-pack">4 units</span>
+                </div>
+                <div class="spec-tag">
+                  <span class="tag-lbl">Shelf Life</span>
+                  <span class="tag-val" id="spec-shelf">357 days</span>
+                </div>
+                <div class="spec-tag">
+                  <span class="tag-lbl">Festival Link</span>
+                  <span class="tag-val" id="spec-festival">None</span>
+                </div>
+                <div class="spec-tag">
+                  <span class="tag-lbl">Weather Sens.</span>
+                  <span class="tag-val" id="spec-weather">Low</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Weight Customization Accordion -->
+            <div class="weights-control-wrapper">
+              <button class="accordion-toggle" id="toggle-weights-btn">
+                <span>Weighted Gower Attribute Scheme</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="weights-panel" id="weights-panel">
+                <div class="weight-preset-row">
+                  <span style="font-size: 0.7rem; color: var(--text-muted); align-self: center;">Presets:</span>
+                  <button class="btn-weight-preset" id="preset-balanced">Balanced</button>
+                  <button class="btn-weight-preset" id="preset-cat-heavy">Category Dominant</button>
+                  <button class="btn-weight-preset" id="preset-attr-heavy">Pack & Tier</button>
+                  <button class="btn-weight-preset" id="btn-optimize-weights" style="background: rgba(16, 185, 129, 0.2); color: var(--emerald-400); border-color: rgba(16, 185, 129, 0.4);">⚡ Auto-Optimize (CV)</button>
+                </div>
+
+                <div class="weight-slider-row">
+                  <span class="slider-label">Category</span>
+                  <span class="slider-pct" id="pct-w-cat">25%</span>
+                  <input type="range" id="w-cat" min="0" max="50" value="25" class="range-slider">
+                </div>
+                <div class="weight-slider-row">
+                  <span class="slider-label">Subcategory</span>
+                  <span class="slider-pct" id="pct-w-subcat">20%</span>
+                  <input type="range" id="w-subcat" min="0" max="50" value="20" class="range-slider">
+                </div>
+                <div class="weight-slider-row">
+                  <span class="slider-label">Festival Link</span>
+                  <span class="slider-pct" id="pct-w-fest">15%</span>
+                  <input type="range" id="w-fest" min="0" max="50" value="15" class="range-slider">
+                </div>
+                <div class="weight-slider-row">
+                  <span class="slider-label">Price Tier</span>
+                  <span class="slider-pct" id="pct-w-tier">15%</span>
+                  <input type="range" id="w-tier" min="0" max="50" value="15" class="range-slider">
+                </div>
+                <div class="weight-slider-row">
+                  <span class="slider-label">Pack Size</span>
+                  <span class="slider-pct" id="pct-w-pack">10%</span>
+                  <input type="range" id="w-pack" min="0" max="50" value="10" class="range-slider">
+                </div>
+                <div class="weight-slider-row">
+                  <span class="slider-label">Shelf Life</span>
+                  <span class="slider-pct" id="pct-w-shelf">8%</span>
+                  <input type="range" id="w-shelf" min="0" max="50" value="8" class="range-slider">
+                </div>
+                <div class="weight-slider-row">
+                  <span class="slider-label">Weather Sensitivity</span>
+                  <span class="slider-pct" id="pct-w-weather">7%</span>
+                  <input type="range" id="w-weather" min="0" max="50" value="7" class="range-slider">
+                </div>
+                
+                <div id="cv-status-box" style="display: none; margin: 0.6rem 0; padding: 0.5rem 0.75rem; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; font-size: 0.75rem;">
+                  <span style="color: var(--emerald-400); font-weight: 600;">✓ Cross-Validation Optimization Active</span>
+                  <div id="cv-status-detail" style="color: #94A3B8; margin-top: 2px;">CV-WAPE: 38.45% → 37.88% (+0.57% pts gain)</div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                  <button class="btn btn-secondary btn-sm" id="reset-weights-btn" style="flex: 1;">Reset Heuristic</button>
+                  <button class="btn btn-accent btn-sm" id="btn-trigger-optimize" style="flex: 1.2;">⚡ Run CV Optimizer</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Promotional De-Biasing Toggle -->
+            <div class="promo-debias-box">
+              <div class="promo-debias-info">
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <span class="debias-label">Promotional De-Biasing</span>
+                  <span id="promo-inflation-badge" class="badge badge-emerald" style="display: none; font-size: 0.68rem; padding: 0.15rem 0.45rem;">-0 U Lift</span>
+                </div>
+                <span class="debias-sub">Strip historical discount lifts for organic launch baseline</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggle-promo-debias">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <button class="btn btn-primary btn-block" id="btn-run-forecast">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Run Analogue Match & Forecast
+            </button>
+          </div>
+
+          <!-- Planner Intervention Console -->
+          <div class="glass-card override-card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h3 class="card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--amber-400);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  Planner Intervention Console
+                </h3>
+                <span class="card-desc" style="margin-bottom: 0;">Adjust the proposal before final replenishment lock</span>
+              </div>
+              <span class="badge badge-warning">Audit Enforced</span>
+            </div>
+            
+            <div class="form-group">
+              <label for="override-week">Target Launch Horizon:</label>
+              <div class="custom-select-wrapper">
+                <select id="override-week" class="custom-select">
+                  <option value="W1">Week 1 (Initial Stocking)</option>
+                  <option value="W2">Week 2 (Intro Promotion)</option>
+                  <option value="W3">Week 3 (Post-Launch Dip)</option>
+                  <option value="W4">Week 4 (Stabilization)</option>
+                </select>
+                <div class="custom-select-arrow">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="override-units">Revised Store Volume (Units / Store):</label>
+              <input type="number" id="override-units" class="custom-input" placeholder="e.g. 185.0" step="1.0">
+              <div class="override-quick-adjust-bar">
+                <button class="adjust-chip" data-delta="-10">-10%</button>
+                <button class="adjust-chip" data-delta="-5">-5%</button>
+                <button class="adjust-chip" data-delta="+5">+5%</button>
+                <button class="adjust-chip" data-delta="+10">+10%</button>
+                <button class="adjust-chip" data-delta="+20">+20%</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="override-reason">Mandatory Business Justification:</label>
+              <textarea id="override-reason" class="custom-textarea" rows="2" placeholder="State operational rationale for changing the AI proposal..."></textarea>
+              <div class="override-reason-chips">
+                <span class="reason-chip" data-reason="Regional Marketing Activation Campaign">Marketing Boost</span>
+                <span class="reason-chip" data-reason="Supplier Distribution & Lead Time Buffer">Supply Buffer</span>
+                <span class="reason-chip" data-reason="Competitor Promotional Price Defense">Promo Defense</span>
+              </div>
+            </div>
+
+            <button class="btn btn-accent btn-block" id="btn-submit-override">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+              Commit Override to Immutable Ledger
+            </button>
+            <div id="override-alert" class="alert-box hidden"></div>
+          </div>
+        </aside>
+
+        <!-- Right Column: Visual Forecast Curve & Analogue Explainability -->
+        <div class="content-panel">
+          
+          <!-- Key Metric Stats Strip -->
+          <div class="stats-strip">
+            <div class="stat-card stat-card-cyan">
+              <div class="stat-header">
+                <span class="stat-label">System Confidence</span>
+                <div class="stat-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                </div>
+              </div>
+              <div class="stat-value text-cyan" id="stat-confidence">--%</div>
+              <div class="stat-footnote" id="stat-confidence-formula">Quality × Depth × Consensus</div>
+            </div>
+
+            <div class="stat-card stat-card-indigo">
+              <div class="stat-header">
+                <span class="stat-label">Top Analogue Similarity</span>
+                <div class="stat-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+              </div>
+              <div class="stat-value text-indigo" id="stat-top-sim">--</div>
+              <div class="stat-footnote" id="stat-top-name">Weighted Gower Match</div>
+            </div>
+
+            <div class="stat-card stat-card-emerald">
+              <div class="stat-header">
+                <span class="stat-label">W1 Launch Forecast</span>
+                <div class="stat-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                </div>
+              </div>
+              <div class="stat-value text-emerald" id="stat-w1-vol">--</div>
+              <div class="stat-footnote">Avg units / store / week</div>
+            </div>
+
+            <div class="stat-card stat-card-purple">
+              <div class="stat-header">
+                <span class="stat-label">Analogue Pool Size</span>
+                <div class="stat-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                </div>
+              </div>
+              <div class="stat-value text-purple" id="stat-pool-size">5</div>
+              <div class="stat-footnote">Retrieved from 80 SKUs</div>
+            </div>
+          </div>
+
+          <!-- Main Launch Curve Chart -->
+          <div class="glass-card chart-container-card">
+            <div class="chart-header">
+              <div>
+                <h3 class="card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                  8-Week Introductory Launch Trajectory Forecast
+                </h3>
+                <span class="chart-subtitle">Similarity-weighted analogue synthesis vs. Deliberately naive category baseline</span>
+              </div>
+              <div class="chart-toolbar">
+                <div class="chart-legend-custom">
+                  <span class="legend-item" id="legend-toggle-forecast"><span class="legend-dot dot-forecast"></span>Analogue Forecast</span>
+                  <span class="legend-item" id="legend-toggle-baseline"><span class="legend-dot dot-baseline"></span>Naive Baseline</span>
+                  <span class="legend-item" id="legend-toggle-debiased" style="display: none;"><span class="legend-dot" style="background: #34D399;"></span>De-biased Organic</span>
+                  <span class="legend-item" id="legend-toggle-analogues"><span class="legend-dot dot-analogue"></span>Individual Analogues</span>
+                </div>
+              </div>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas id="launchCurveChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Visual Attribute-Level Attribution & Explainability Chart -->
+          <div class="glass-card chart-container-card" style="margin-top: 1.25rem;">
+            <div class="chart-header">
+              <div>
+                <h3 class="card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+                  Visual Attribute Attribution & Explainability Radar
+                </h3>
+                <span class="chart-subtitle">Direct explainability: Per-attribute Weighted Gower affinity across candidate analogues</span>
+              </div>
+              <div class="chart-toolbar">
+                <button class="filter-chip active" id="btn-chart-view-radar">Radar View</button>
+                <button class="filter-chip" id="btn-chart-view-bar">Bar Attribution</button>
+                <button class="btn btn-secondary btn-sm" id="btn-export-csv" title="Export Plan to CSV" style="margin-left: 0.5rem; padding: 0.35rem 0.75rem;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Export CSV
+                </button>
+              </div>
+            </div>
+            <div class="canvas-wrapper" style="height: 330px;">
+              <canvas id="attributeAttributionChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Retrieved Analogues Cards Section -->
+          <div class="analogues-section">
+            <div class="section-header">
+              <h3 class="section-title">Retrieved Analogues & Per-Attribute Explainability Breakdown</h3>
+              <p class="section-desc">Transparent attribution showing exactly which product characteristics drove selection.</p>
+            </div>
+            <div class="analogues-grid" id="analogues-grid">
+              <!-- Dynamically populated cards -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 2: EVALUATION BENCHMARK -->
+    <section class="tab-pane" id="tab-benchmark">
+      <div class="benchmark-container">
+        
+        <div class="benchmark-hero">
+          <div>
+            <h2 class="hero-title">Cold-Start Benchmarking: Analogue Selector vs. Baseline</h2>
+            <p class="hero-desc">Rigorous quantitative evaluation across 12 held-out cold-start test products with zero historical data available at inference time.</p>
+          </div>
+          <button class="btn btn-secondary" id="btn-refresh-benchmark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            Recompute Metrics
+          </button>
+        </div>
+
+        <!-- Overall KPI Cards -->
+        <div class="stats-strip benchmark-stats-strip">
+          <div class="stat-card card-glow">
+            <div class="stat-label">Analogue Selector WAPE</div>
+            <div class="stat-value text-emerald" id="bench-sel-wape">25.36%</div>
+            <div class="stat-footnote">Target cold-start model</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Naive Baseline WAPE</div>
+            <div class="stat-value text-amber" id="bench-base-wape">31.82%</div>
+            <div class="stat-footnote">Category-average benchmark</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">WAPE Improvement</div>
+            <div class="stat-value text-cyan" id="bench-improvement">+6.46% pts</div>
+            <div class="stat-footnote" id="bench-pct-err">-20.3% error reduction</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Selector MAPE</div>
+            <div class="stat-value text-purple" id="bench-sel-mape">32.69%</div>
+            <div class="stat-footnote">Baseline MAPE: 40.12%</div>
+          </div>
+        </div>
+
+        <!-- Weekly Comparison Chart -->
+        <div class="glass-card">
+          <div class="card-header">
+            <h3 class="card-title">Week-by-Week WAPE Accuracy Profile (W1 to W8)</h3>
+            <span class="badge badge-neutral">Lower Error is Better</span>
+          </div>
+          <div class="canvas-wrapper-sm">
+            <canvas id="benchmarkWeeklyChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Per-Product Test Breakdown Table -->
+        <div class="glass-card table-card">
+          <div class="table-toolbar">
+            <h3 class="card-title">Held-Out Test Set Performance (12 Cold-Start SKUs)</h3>
+            <input type="text" id="benchmark-search-input" class="custom-input table-search-input" placeholder="Search SKU or name...">
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="benchmark-table">
+              <thead>
+                <tr>
+                  <th>Product SKU</th>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Confidence</th>
+                  <th>Baseline WAPE</th>
+                  <th>Selector WAPE</th>
+                  <th>Variance</th>
+                  <th>Outcome</th>
+                </tr>
+              </thead>
+              <tbody id="benchmark-tbody">
+                <!-- Dynamically generated rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 3: IMMUTABLE AUDIT LEDGER -->
+    <section class="tab-pane" id="tab-audit">
+      <div class="audit-container">
+        
+        <div class="benchmark-hero">
+          <div>
+            <div class="badge-row" style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <span class="badge badge-emerald">Engine Enforced</span>
+              <span class="badge badge-accent">Append-Only Immutability</span>
+            </div>
+            <h2 class="hero-title">Decision Audit Trail & Change Ledger</h2>
+            <p class="hero-desc">Non-repudiable audit ledger capturing every algorithmic proposal and human planner override. Deletions and updates are strictly prevented by SQLite triggers.</p>
+          </div>
+
+          <div class="audit-actions" style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-warning" id="btn-test-tamper">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Test Trigger Security (Simulate Tamper)
+            </button>
+            <button class="btn btn-secondary" id="btn-refresh-audit">Refresh Log</button>
+          </div>
+        </div>
+
+        <!-- Security Trigger Alert Banner (Triggered by Test Tamper) -->
+        <div id="tamper-result-box" class="tamper-box hidden"></div>
+
+        <!-- Audit Table -->
+        <div class="glass-card table-card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Change ID</th>
+                  <th>SKU</th>
+                  <th>Source</th>
+                  <th>Actor</th>
+                  <th>Timestamp (UTC)</th>
+                  <th>Field Modified</th>
+                  <th>Original Value</th>
+                  <th>Committed Value</th>
+                  <th>Business Rationale</th>
+                </tr>
+              </thead>
+              <tbody id="audit-tbody">
+                <!-- Dynamically populated audit rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 4: DISRUPTION STRESS TESTING SIMULATOR -->
+    <section class="tab-pane" id="tab-disruption">
+      <div class="disruption-container">
+        
+        <div class="benchmark-hero">
+          <div>
+            <div class="badge-row" style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <span class="badge badge-warning">Resilience Engine</span>
+              <span class="badge badge-accent">Phase 2 Disruption Simulator</span>
+            </div>
+            <h2 class="hero-title">Supply Chain Disruption & Demand Shock Simulator</h2>
+            <p class="hero-desc">Stress-test cold-start launch curves against supplier shipment delays, warehouse cold-chain throughput caps, and unexpected viral demand surges.</p>
+          </div>
+
+          <div class="quick-preset-cluster" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="filter-chip active" id="preset-disrupt-port">2-Wk Port Delay</button>
+            <button class="filter-chip" id="preset-disrupt-reefer">Reefer Truck Cap (110 U)</button>
+            <button class="filter-chip" id="preset-disrupt-viral">Viral Surge (2.5x)</button>
+            <button class="filter-chip" id="preset-disrupt-heatwave">Heatwave Surge (+65%)</button>
+            <button class="filter-chip" id="preset-disrupt-monsoon">Monsoon Rain (-30%)</button>
+            <button class="filter-chip" id="preset-disrupt-diwali">Diwali Shift (-2 Wks)</button>
+          </div>
+        </div>
+
+        <div class="layout-grid">
+          
+          <!-- Left Column: Disruption Controls -->
+          <aside class="sidebar-panel">
+            <div class="glass-card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  Disruption Parameters
+                </h3>
+              </div>
+
+              <div class="form-group">
+                <label for="disrupt-sku-select">Target Cold-Start SKU:</label>
+                <div class="custom-select-wrapper">
+                  <select id="disrupt-sku-select" class="custom-select">
+                    <!-- Populated dynamically -->
+                  </select>
+                  <div class="custom-select-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="disrupt-scenario-select">Disruption Scenario Type:</label>
+                <div class="custom-select-wrapper">
+                  <select id="disrupt-scenario-select" class="custom-select">
+                    <option value="supplier_delay" selected>Supplier Inbound Delay (Delivery Lag)</option>
+                    <option value="capacity_loss">Logistics Capacity Ceiling (Throughput Bottleneck)</option>
+                    <option value="unplanned_spike">Viral Demand Surge (Pantry-Loading & Stockouts)</option>
+                    <option value="weather_anomaly">Weather Anomaly (Heatwave, Monsoon, Cold Snap)</option>
+                    <option value="festival_shift">Localized Festival Shift (Calendar Drift & Misalignment)</option>
+                  </select>
+                  <div class="custom-select-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dynamic Parameter Sub-Panels -->
+              <div id="disrupt-params-supplier" class="disrupt-subpanel">
+                <div class="weight-slider-row">
+                  <span class="slider-label">Delay Duration</span>
+                  <span class="slider-pct" id="val-delay-weeks">2 Wks</span>
+                  <input type="range" id="param-delay-weeks" min="1" max="4" value="2" class="range-slider">
+                </div>
+                <div class="weight-slider-row">
+                  <span class="slider-label">Spoilage Rate</span>
+                  <span class="slider-pct" id="val-spoilage-rate">5% / wk</span>
+                  <input type="range" id="param-spoilage-rate" min="1" max="25" value="5" class="range-slider">
+                </div>
+              </div>
+
+              <div id="disrupt-params-capacity" class="disrupt-subpanel" style="display: none;">
+                <div class="weight-slider-row">
+                  <span class="slider-label">Store Ceiling Cap</span>
+                  <span class="slider-pct" id="val-capacity-ceiling">110 U</span>
+                  <input type="range" id="param-capacity-ceiling" min="60" max="200" value="110" step="5" class="range-slider">
+                </div>
+                <div class="weight-slider-row">
+                  <span class="slider-label">Backlog Spillover</span>
+                  <span class="slider-pct" id="val-spillover-rate">35%</span>
+                  <input type="range" id="param-spillover-rate" min="0" max="80" value="35" step="5" class="range-slider">
+                </div>
+              </div>
+
+              <div id="disrupt-params-spike" class="disrupt-subpanel" style="display: none;">
+                <div class="weight-slider-row">
+                  <span class="slider-label">Surge Week</span>
+                  <span class="slider-pct" id="val-spike-week">Week 3</span>
+                  <input type="range" id="param-spike-week" min="1" max="8" value="3" class="range-slider">
+                </div>
+                <div class="weight-slider-row">
+                  <span class="slider-label">Surge Multiplier</span>
+                  <span class="slider-pct" id="val-spike-multiplier">2.5x</span>
+                  <input type="range" id="param-spike-multiplier" min="12" max="40" value="25" class="range-slider">
+                </div>
+              </div>
+
+              <!-- Weather Anomaly Subpanel -->
+              <div id="disrupt-params-weather" class="disrupt-subpanel" style="display: none;">
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                  <label for="param-weather-type" style="font-size: 0.78rem;">Meteorological Shock Type:</label>
+                  <div class="custom-select-wrapper">
+                    <select id="param-weather-type" class="custom-select" style="font-size: 0.8rem; padding: 0.45rem 0.7rem;">
+                      <option value="heatwave" selected>Heatwave Surge (+65% Beverage Demand)</option>
+                      <option value="torrential_rain">Torrential Monsoon (-30% Store Footfall)</option>
+                      <option value="cold_snap">Cold Snap / Frost (-35% Chilled / +30% Warm)</option>
+                    </select>
+                    <div class="custom-select-arrow">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                  </div>
+                </div>
+                <div class="weight-slider-row">
+                  <span class="slider-label">Shock Intensity</span>
+                  <span class="slider-pct" id="val-weather-intensity">65%</span>
+                  <input type="range" id="param-weather-intensity" min="20" max="100" value="65" step="5" class="range-slider">
+                </div>
+                <div class="weight-slider-row">
+                  <span class="slider-label">Start Week</span>
+                  <span class="slider-pct" id="val-weather-week">Week 2</span>
+                  <input type="range" id="param-weather-week" min="1" max="6" value="2" class="range-slider">
+                </div>
+              </div>
+
+              <!-- Festival Shift Subpanel -->
+              <div id="disrupt-params-festival" class="disrupt-subpanel" style="display: none;">
+                <div class="form-group" style="margin-bottom: 0.75rem;">
+                  <label for="param-fest-direction" style="font-size: 0.78rem;">Calendar Drift Direction:</label>
+                  <div class="custom-select-wrapper">
+                    <select id="param-fest-direction" class="custom-select" style="font-size: 0.8rem; padding: 0.45rem 0.7rem;">
+                      <option value="earlier" selected>Earlier Date (-2 Weeks Ahead)</option>
+                      <option value="later">Later Date (+2 Weeks Delayed)</option>
+                    </select>
+                    <div class="custom-select-arrow">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                  </div>
+                </div>
+                <div class="weight-slider-row">
+                  <span class="slider-label">Drift Magnitude</span>
+                  <span class="slider-pct" id="val-fest-shift-weeks">2 Wks</span>
+                  <input type="range" id="param-fest-shift-weeks" min="1" max="3" value="2" class="range-slider">
+                </div>
+                <div class="weight-slider-row">
+                  <span class="slider-label">Surge Multiplier</span>
+                  <span class="slider-pct" id="val-fest-multiplier">1.9x</span>
+                  <input type="range" id="param-fest-multiplier" min="13" max="25" value="19" class="range-slider">
+                </div>
+              </div>
+
+              <button class="btn btn-primary btn-block" id="btn-run-disruption" style="margin-top: 1rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Execute Disruption Simulation
+              </button>
+
+              <button class="btn btn-warning btn-block" id="btn-log-disruption-override" style="margin-top: 0.75rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Log Buffer Override to Audit Trail
+              </button>
+            </div>
+          </aside>
+
+          <!-- Right Column: Disruption Telemetry & Chart -->
+          <div class="content-panel">
+            
+            <!-- Key Disruption Metric Cards -->
+            <div class="stats-strip">
+              <div class="stat-card stat-card-purple">
+                <div class="stat-header">
+                  <span class="stat-label">Lost Sales Volume</span>
+                  <div class="stat-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                  </div>
+                </div>
+                <div class="stat-value text-purple" id="disrupt-lost-sales">--</div>
+                <div class="stat-footnote">Total unfulfilled units / store</div>
+              </div>
+
+              <div class="stat-card stat-card-indigo">
+                <div class="stat-header">
+                  <span class="stat-label">Perishability Spoilage</span>
+                  <div class="stat-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  </div>
+                </div>
+                <div class="stat-value text-indigo" id="disrupt-spoilage">--</div>
+                <div class="stat-footnote">Estimated write-off units</div>
+              </div>
+
+              <div class="stat-card stat-card-cyan">
+                <div class="stat-header">
+                  <span class="stat-label">Peak Stockout Risk</span>
+                  <div class="stat-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  </div>
+                </div>
+                <div class="stat-value text-cyan" id="disrupt-stockout-risk">--%</div>
+                <div class="stat-footnote">Probability of retail outage</div>
+              </div>
+
+              <div class="stat-card stat-card-emerald">
+                <div class="stat-header">
+                  <span class="stat-label">Recommended Buffer</span>
+                  <div class="stat-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                  </div>
+                </div>
+                <div class="stat-value text-emerald" id="disrupt-buffer-rec">--</div>
+                <div class="stat-footnote">Emergency safety stock units</div>
+              </div>
+            </div>
+
+            <!-- Comparison Chart -->
+            <div class="glass-card chart-container-card">
+              <div class="chart-header">
+                <div>
+                  <h3 class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                    Original Plan vs. Disrupted Delivery Profile
+                  </h3>
+                  <span class="chart-subtitle" id="disrupt-chart-sub">Stress impact on 8-week launch replenishment</span>
+                </div>
+              </div>
+              <div class="canvas-wrapper">
+                <canvas id="disruptionChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Actionable Operational Playbook Card -->
+            <div class="glass-card" style="margin-top: 1.25rem;">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--cyan-400);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  Planner Playbook & Operational Guidance
+                </h3>
+                <span class="badge badge-accent" id="disrupt-status-badge">Simulation Ready</span>
+              </div>
+              <div class="alert-box-info" id="disrupt-guidance-box">
+                Configure your stress test scenario on the left and click "Execute Disruption Simulation" to generate operational playbook recommendations.
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 4: EDGE CASE SANDBOX -->
+    <section class="tab-pane" id="tab-edge">
+      <div class="edge-container">
+        
+        <div class="benchmark-hero">
+          <div>
+            <span class="badge badge-warning" style="margin-bottom: 0.4rem;">Failure Resilience</span>
+            <h2 class="hero-title">Edge Case & Degraded Mode Sandbox</h2>
+            <p class="hero-desc">Test how the decision-support system handles severe cold-start failures, unprecedented categories, and zero-match products without crashing or returning ungrounded numbers.</p>
+          </div>
+        </div>
+
+        <div class="layout-grid">
+          
+          <div class="sidebar-panel">
+            <div class="glass-card">
+              <h3 class="card-title">Simulate Unseen Category SKU</h3>
+              <p class="card-desc">Inject an out-of-catalog product with an unknown category (e.g. Cellular Agriculture) to verify graceful degradation.</p>
+
+              <div class="form-group">
+                <label>Preset Edge Scenario:</label>
+                <div class="custom-select-wrapper">
+                  <select id="edge-preset-select" class="custom-select">
+                    <option value="cellular">Novel Category: 'Cellular Agriculture Caviar'</option>
+                    <option value="insect">Novel Category: 'Cricket & Algae Protein Bites'</option>
+                    <option value="zero_pack">Extreme Pack Size: 'Bulk Commercial Container (100pk)'</option>
+                  </select>
+                  <div class="custom-select-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                  </div>
+                </div>
+              </div>
+
+              <button class="btn btn-primary btn-block" id="btn-run-edge-test">
+                Execute Edge Case Test
+              </button>
+            </div>
+          </div>
+
+          <div class="content-panel">
+            <div class="glass-card" id="edge-result-card">
+              <div class="card-header">
+                <h3 class="card-title">System Degradation Telemetry</h3>
+                <span class="badge badge-accent" id="edge-status-badge">Standby</span>
+              </div>
+
+              <div id="edge-alert-box" class="alert-box-info">
+                Select an edge scenario and click Execute to observe graceful fallback behavior.
+              </div>
+
+              <div class="canvas-wrapper-sm" style="margin-top: 1.5rem;">
+                <canvas id="edgeCurveChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Relative script path for file viewing + server fallback -->
+  <script src="app.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
